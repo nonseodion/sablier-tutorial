@@ -2,13 +2,17 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Contract } from "@ethersproject/contracts";
 import { Web3Provider, getDefaultProvider } from "@ethersproject/providers";
 import { useQuery } from "@apollo/react-hooks";
+import { useWeb3React } from '@web3-react/core';
+import DateTimePicker from 'react-datetime-picker';
 
-import { Body, Button, Header, Image, Link } from "./components";
+import { Body, Button, Header, /*Image, Link*/ } from "./components";
 import { web3Modal, logoutOfWeb3Modal } from './utils/web3Modal'
-import logo from "./ethereumLogo.png";
 
 import { MAINNET_ID, addresses, abis } from "@sablier-v1-app/contracts";
 import GET_STREAMS from "./graphql/subgraph";
+
+import BigNumber from 'bignumber.js';
+BigNumber.config({ EXPONENTIAL_AT: 30 });
 
 async function readOnChainData() {
   // Should replace with the end-user wallet, e.g. Metamask
@@ -36,9 +40,22 @@ function WalletButton({ provider, loadWeb3Modal }) {
   );
 }
 
+// function showAddress(){
+
+// }
+
+// createStream = () => {
+//   const sablier = new ethers.Contract(addresses[chainId].sablier, abis.sablier, getProviderOrSigner(library, account))
+// }
+
 function App() {
   const { loading, error, data } = useQuery(GET_STREAMS);
   const [provider, setProvider] = useState();
+  const [value1, onChange1] = useState(new Date());
+  const [value2, onChange2] = useState(new Date());
+
+  const web3React = useWeb3React();
+  console.log(web3React);
 
   /* Open wallet selection modal. */
   const loadWeb3Modal = useCallback(async () => {
@@ -65,22 +82,21 @@ function App() {
         <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} />
       </Header>
       <Body>
-        <Image src={logo} alt="react-logo" />
-        <p>
-          Edit <code>packages/react-app/src/App.js</code> and save to reload.
-        </p>
-        {/* Remove the "hidden" prop and open the JavaScript console in the browser to see what this function does */}
-        <Button hidden onClick={() => readOnChainData()}>
-          Read On-Chain Data
+        <h1>Let's Create a Payment Stream</h1>
+        <p>Wallet Connected: </p>
+        <input placeholder="Enter Deposit Amount"/>
+        <input placeholder="Recipient Address"/>
+        <label for="start">Start Time</label>
+        <DateTimePicker 
+          onChange={onChange1} 
+          value={value1}/>
+        <label for="stop">Stop Time</label>
+        <DateTimePicker 
+          onChange={onChange2} 
+          value={value2}/>
+        <Button>
+          Create Stream
         </Button>
-        <Link
-          href="https://ethereum.org/developers/#getting-started"
-          style={{ marginTop: "8px" }}
-        >
-          Learn Ethereum
-        </Link>
-        <Link href="https://reactjs.org">Learn React</Link>
-        <Link href="https://docs.sablier.finance/" >Learn Sablier v1</Link>
       </Body>
     </div>
   );
